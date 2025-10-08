@@ -1,0 +1,70 @@
+import random
+import math
+
+
+
+def random_state(n):
+    """Generate a random board configuration."""
+    return [random.randint(0, n - 1) for _ in range(n)]
+
+def compute_attacks(state):
+    """Compute number of attacking pairs of queens."""
+    attacks = 0
+    n = len(state)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if state[i] == state[j] or abs(state[i] - state[j]) == abs(i - j):
+                attacks += 1
+    return attacks
+
+def random_neighbor(state):
+    """Generate a random neighbor by moving one queen in its column."""
+    n = len(state)
+    neighbor = list(state)
+    col = random.randint(0, n - 1)
+    row = random.randint(0, n - 1)
+    neighbor[col] = row
+    return neighbor
+
+
+
+def simulated_annealing(n, initial_temp=100, cooling_rate=0.95, min_temp=0.1):
+    """Solve N-Queens using Simulated Annealing."""
+    current = random_state(n)
+    current_cost = compute_attacks(current)
+    temperature = initial_temp
+
+    while temperature > min_temp and current_cost != 0:
+        neighbor = random_neighbor(current)
+        neighbor_cost = compute_attacks(neighbor)
+        delta = neighbor_cost - current_cost
+
+      
+        if delta < 0:
+            current = neighbor
+            current_cost = neighbor_cost
+        else:
+                       probability = math.exp(-delta / temperature)
+            if random.random() < probability:
+                current = neighbor
+                current_cost = neighbor_cost
+
+       
+        temperature *= cooling_rate
+
+    return current, current_cost
+
+
+if __name__ == "__main__":
+    N = 8  
+    print("Solving 8-Queens using Simulated Annealing...\n")
+
+    solution, cost = simulated_annealing(N)
+
+    print("Final Board Configuration:", solution)
+    print("Number of Attacking Pairs:", cost)
+
+    if cost == 0:
+        print("✅ Solution Found!")
+    else:
+        print("⚠️ Could not find an optimal solution (try again).")

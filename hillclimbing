@@ -1,0 +1,75 @@
+import random
+
+# -------------------------------
+# Helper Functions
+# -------------------------------
+
+def random_state(n):
+    """Generate a random board configuration."""
+    return [random.randint(0, n - 1) for _ in range(n)]
+
+def compute_attacks(state):
+    """Compute the number of attacking pairs of queens."""
+    n = len(state)
+    attacks = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Same row or diagonal
+            if state[i] == state[j] or abs(state[i] - state[j]) == abs(i - j):
+                attacks += 1
+    return attacks
+
+def get_neighbors(state):
+    """Generate all possible neighbors by moving one queen in its column."""
+    neighbors = []
+    n = len(state)
+    for col in range(n):
+        for row in range(n):
+            if row != state[col]:
+                new_state = list(state)
+                new_state[col] = row
+                neighbors.append(new_state)
+    return neighbors
+
+# -------------------------------
+# Hill Climbing Algorithm
+# -------------------------------
+
+def hill_climbing(n):
+    """Solve N-Queens using Hill Climbing."""
+    current = random_state(n)
+    current_attacks = compute_attacks(current)
+
+    while True:
+        neighbors = get_neighbors(current)
+        neighbor_attacks = [compute_attacks(neighbor) for neighbor in neighbors]
+
+        # Find the best neighbor (lowest heuristic)
+        min_attacks = min(neighbor_attacks)
+        best_neighbor = neighbors[neighbor_attacks.index(min_attacks)]
+
+        # If no better neighbor, stop
+        if min_attacks >= current_attacks:
+            break
+
+        # Move to the better neighbor
+        current = best_neighbor
+        current_attacks = min_attacks
+
+    return current, current_attacks
+
+# -------------------------------
+# Main Execution
+# -------------------------------
+
+if __name__ == "__main__":
+    N = int(input("Enter the number of queens (N): "))
+    solution, attacks = hill_climbing(N)
+
+    print("\nFinal Board Configuration:", solution)
+    print("Number of Attacking Pairs:", attacks)
+
+    if attacks == 0:
+        print("✅ Solution Found!")
+    else:
+        print("⚠️ Local Optimum Reached (Try Again)")
